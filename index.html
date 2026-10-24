@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Limón Agrio – Sistema de ventas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;800&family=Figtree:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --fondo: #f7f9ec;
+    --tinta: #17321f;
+    --limon: #e6dd2e;
+    --hoja: #3d8b4c;
+    --suave: #e4ebcf;
+    --alerta: #b8321c;
+    --blanco: #ffffff;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--fondo);
+    color: var(--tinta);
+    font-family: "Figtree", system-ui, sans-serif;
+    font-size: 1.05rem;
+    line-height: 1.5;
+  }
+  h1, h2, h3 { font-family: "Bricolage Grotesque", "Figtree", sans-serif; line-height: 1.1; margin: 0; }
+  header { background: var(--tinta); color: var(--fondo); padding: 1rem 1.25rem 0; }
+  .marca { display: flex; align-items: center; gap: .75rem; max-width: 960px; margin: 0 auto; }
+  .rodaja {
+    width: 2.4rem; height: 2.4rem; border-radius: 50%;
+    background: radial-gradient(circle, var(--blanco) 0 18%, var(--limon) 19% 62%, var(--hoja) 63% 100%);
+    flex: none;
+  }
+  .marca h1 { font-size: 1.5rem; font-weight: 800; }
+  nav { max-width: 960px; margin: 1rem auto 0; display: flex; gap: .25rem; overflow-x: auto; }
+  nav button {
+    font: inherit; font-weight: 600; cursor: pointer;
+    background: transparent; color: var(--fondo);
+    border: 0; padding: .7rem 1.1rem; border-radius: .6rem .6rem 0 0;
+  }
+  nav button:hover { background: rgba(255,255,255,.12); }
+  nav button[aria-current="page"] { background: var(--fondo); color: var(--tinta); }
+  :focus-visible { outline: 3px solid var(--limon); outline-offset: 2px; }
+  main { max-width: 960px; margin: 0 auto; padding: 1.75rem 1.25rem 3rem; }
+  section[hidden] { display: none; }
+  h2 { font-size: 2rem; font-weight: 800; margin-bottom: .4rem; }
+  .ayuda { margin: 0 0 1.5rem; max-width: 60ch; }
+
+  .cifras { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+  .cifra { background: var(--blanco); border: 2px solid var(--tinta); border-radius: .75rem; padding: 1.1rem; }
+  .cifra.destacada { background: var(--limon); }
+  .cifra span { display: block; font-weight: 600; }
+  .cifra strong { font-family: "Bricolage Grotesque", sans-serif; font-size: 2.4rem; font-weight: 800; }
+
+  .tabla-caja { overflow-x: auto; background: var(--blanco); border: 2px solid var(--tinta); border-radius: .75rem; }
+  table { width: 100%; border-collapse: collapse; min-width: 480px; }
+  th, td { text-align: left; padding: .7rem 1rem; border-bottom: 1px solid var(--suave); }
+  th { background: var(--suave); }
+  tr:last-child td { border-bottom: 0; }
+  .num { text-align: right; }
+  .aviso { color: var(--alerta); font-weight: 600; }
+
+  form {
+    margin-top: 1.5rem; padding: 1.25rem; background: var(--suave);
+    border-radius: .75rem; display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: .9rem; align-items: end;
+  }
+  form h3 { grid-column: 1 / -1; font-size: 1.3rem; }
+  label { display: grid; gap: .3rem; font-weight: 600; }
+  input, select {
+    font: inherit; padding: .6rem .7rem; border: 2px solid var(--tinta);
+    border-radius: .5rem; background: var(--blanco); color: var(--tinta); width: 100%;
+  }
+  .boton {
+    font: inherit; font-weight: 600; cursor: pointer; padding: .7rem 1.2rem;
+    background: var(--tinta); color: var(--fondo); border: 0; border-radius: .5rem;
+  }
+  .boton:hover { background: var(--hoja); }
+  .mensaje { grid-column: 1 / -1; margin: 0; min-height: 1.5rem; font-weight: 600; }
+  .mensaje.error { color: var(--alerta); }
+  .mensaje.ok { color: var(--hoja); }
+  ul.lista { margin: 0; padding-left: 1.2rem; }
+  footer { text-align: center; padding: 1.5rem; font-size: .9rem; }
+
+  @media (prefers-reduced-motion: no-preference) {
+    nav button, .boton { transition: background .15s; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="marca">
+    <div class="rodaja" aria-hidden="true"></div>
+    <h1>Limón Agrio</h1>
+  </div>
+  <nav aria-label="Menú principal">
+    <button data-vista="inicio">Inicio</button>
+    <button data-vista="productos">Productos</button>
+    <button data-vista="clientes">Clientes</button>
+    <button data-vista="ventas">Ventas</button>
+  </nav>
+</header>
+
+<main>
+
+  <!-- INICIO -->
+  <section id="inicio">
+    <h2>Así va la tienda hoy</h2>
+    <p class="ayuda">Un resumen rápido para saber cuánto se vendió y qué hay que reponer.</p>
+    <div class="cifras">
+      <div class="cifra destacada"><span>Vendido hoy</span><strong id="cifra-total">C$ 0</strong></div>
+      <div class="cifra"><span>Ventas hechas</span><strong id="cifra-cantidad">0</strong></div>
+      <div class="cifra"><span>Clientes registrados</span><strong id="cifra-clientes">0</strong></div>
+    </div>
+    <h3>Productos por acabarse</h3>
+    <ul class="lista" id="lista-bajos"></ul>
+  </section>
+
+  <!-- PRODUCTOS -->
+  <section id="productos" hidden>
+    <h2>Productos</h2>
+    <p class="ayuda">Todo lo que vende la tienda, con su precio y cuántos quedan.</p>
+    <div class="tabla-caja">
+      <table>
+        <thead><tr><th>Código</th><th>Producto</th><th class="num">Precio</th><th class="num">Disponibles</th><th>Estado</th></tr></thead>
+        <tbody id="tabla-productos"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- CLIENTES -->
+  <section id="clientes" hidden>
+    <h2>Clientes</h2>
+    <p class="ayuda">Las personas que compran en la tienda y cuántas veces lo han hecho.</p>
+    <div class="tabla-caja">
+      <table>
+        <thead><tr><th>Nombre</th><th>Teléfono</th><th class="num">Compras hechas</th></tr></thead>
+        <tbody id="tabla-clientes"></tbody>
+      </table>
+    </div>
+    <form id="form-cliente">
+      <h3>Agregar un cliente</h3>
+      <label>Nombre <input id="cli-nombre" required></label>
+      <label>Teléfono <input id="cli-tel" inputmode="tel" required></label>
+      <button class="boton" type="submit">Guardar cliente</button>
+      <p class="mensaje" id="msg-cliente" role="status"></p>
+    </form>
+  </section>
+
+  <!-- VENTAS -->
+  <section id="ventas" hidden>
+    <h2>Ventas</h2>
+    <p class="ayuda">Anota una venta y el total se calcula solo. Lo que vendas se resta de lo disponible.</p>
+    <div class="tabla-caja">
+      <table>
+        <thead><tr><th>Fecha</th><th>Cliente</th><th>Detalle</th><th class="num">Total</th></tr></thead>
+        <tbody id="tabla-ventas"></tbody>
+      </table>
+    </div>
+    <form id="form-venta">
+      <h3>Anotar una venta</h3>
+      <label>Cliente <select id="ven-cliente" required></select></label>
+      <label>Producto <select id="ven-producto" required></select></label>
+      <label>Cantidad <input id="ven-cantidad" type="number" min="1" value="1" required></label>
+      <button class="boton" type="submit">Anotar venta</button>
+      <p class="mensaje" id="msg-venta" role="status"></p>
+    </form>
+  </section>
+
+</main>
+
+<footer>Página de muestra con datos inventados. No guarda información real.</footer>
+
+<script>
+  // ---------- Datos de ejemplo ----------
+  var hoy = new Date().toLocaleDateString("es-NI");
+
+  var productos = [
+    { codigo: "001", nombre: "Limón por bolsa",    precio: 40, stock: 25 },
+    { codigo: "002", nombre: "Limonada grande",    precio: 60, stock: 12 },
+    { codigo: "003", nombre: "Dulce de limón",     precio: 15, stock: 40 },
+    { codigo: "004", nombre: "Jugo de limón en botella", precio: 85, stock: 6 },
+    { codigo: "005", nombre: "Mermelada de limón", precio: 110, stock: 4 }
+  ];
+
+  var clientes = [
+    { nombre: "Ana Martínez",   tel: "8888-1234" },
+    { nombre: "Carlos Rivas",   tel: "8777-5521" },
+    { nombre: "Lucía Herrera",  tel: "8666-9087" },
+    { nombre: "Mostrador (sin nombre)", tel: "—" }
+  ];
+
+  var ventas = [
+    { fecha: hoy, cliente: "Ana Martínez",  detalle: "2 × Limonada grande",  total: 120 },
+    { fecha: hoy, cliente: "Carlos Rivas",  detalle: "1 × Limón por bolsa",  total: 40 },
+    { fecha: hoy, cliente: "Lucía Herrera", detalle: "3 × Dulce de limón",   total: 45 }
+  ];
+
+  var POCO = 8; // desde esta cantidad hacia abajo se avisa que se acaba
+
+  function dinero(n) { return "C$ " + n.toLocaleString("es-NI"); }
+  function el(id) { return document.getElementById(id); }
+
+  // ---------- Dibujar pantallas ----------
+  function dibujarInicio() {
+    var total = ventas.reduce(function (s, v) { return s + v.total; }, 0);
+    el("cifra-total").textContent = dinero(total);
+    el("cifra-cantidad").textContent = ventas.length;
+    el("cifra-clientes").textContent = clientes.length;
+
+    var bajos = productos.filter(function (p) { return p.stock <= POCO; });
+    el("lista-bajos").innerHTML = bajos.length
+      ? bajos.map(function (p) { return "<li>" + p.nombre + ": quedan " + p.stock + "</li>"; }).join("")
+      : "<li>Todo está bien surtido.</li>";
+  }
+
+  function dibujarProductos() {
+    el("tabla-productos").innerHTML = productos.map(function (p) {
+      var estado = p.stock <= POCO ? '<span class="aviso">Se está acabando</span>' : "Bien surtido";
+      return "<tr><td>" + p.codigo + "</td><td>" + p.nombre + '</td><td class="num">' + dinero(p.precio) +
+             '</td><td class="num">' + p.stock + "</td><td>" + estado + "</td></tr>";
+    }).join("");
+  }
+
+  function dibujarClientes() {
+    el("tabla-clientes").innerHTML = clientes.map(function (c) {
+      var compras = ventas.filter(function (v) { return v.cliente === c.nombre; }).length;
+      return "<tr><td>" + c.nombre + "</td><td>" + c.tel + '</td><td class="num">' + compras + "</td></tr>";
+    }).join("");
+  }
+
+  function dibujarVentas() {
+    el("tabla-ventas").innerHTML = ventas.slice().reverse().map(function (v) {
+      return "<tr><td>" + v.fecha + "</td><td>" + v.cliente + "</td><td>" + v.detalle +
+             '</td><td class="num">' + dinero(v.total) + "</td></tr>";
+    }).join("");
+
+    el("ven-cliente").innerHTML = clientes.map(function (c) {
+      return "<option>" + c.nombre + "</option>";
+    }).join("");
+    var elegido = el("ven-producto").value;
+    el("ven-producto").innerHTML = productos.map(function (p, i) {
+      return '<option value="' + i + '">' + p.nombre + " (" + dinero(p.precio) + ")</option>";
+    }).join("");
+    if (elegido) el("ven-producto").value = elegido;
+  }
+
+  function dibujarTodo() {
+    dibujarInicio(); dibujarProductos(); dibujarClientes(); dibujarVentas();
+  }
+
+  // ---------- Menú ----------
+  function mostrar(vista) {
+    document.querySelectorAll("main section").forEach(function (s) { s.hidden = s.id !== vista; });
+    document.querySelectorAll("nav button").forEach(function (b) {
+      if (b.dataset.vista === vista) b.setAttribute("aria-current", "page");
+      else b.removeAttribute("aria-current");
+    });
+    if (location.hash !== "#" + vista) history.replaceState(null, "", "#" + vista);
+  }
+
+  document.querySelectorAll("nav button").forEach(function (b) {
+    b.addEventListener("click", function () { mostrar(b.dataset.vista); });
+  });
+
+  // ---------- Formularios ----------
+  function aviso(id, texto, tipo) {
+    var m = el(id);
+    m.textContent = texto;
+    m.className = "mensaje " + tipo;
+  }
+
+  el("form-cliente").addEventListener("submit", function (e) {
+    e.preventDefault();
+    var nombre = el("cli-nombre").value.trim();
+    var tel = el("cli-tel").value.trim();
+    if (!nombre || !tel) { aviso("msg-cliente", "Escribe el nombre y el teléfono.", "error"); return; }
+    clientes.push({ nombre: nombre, tel: tel });
+    e.target.reset();
+    dibujarTodo();
+    aviso("msg-cliente", "Cliente guardado.", "ok");
+  });
+
+  el("form-venta").addEventListener("submit", function (e) {
+    e.preventDefault();
+    var p = productos[Number(el("ven-producto").value)];
+    var cantidad = Number(el("ven-cantidad").value);
+    if (!cantidad || cantidad < 1) { aviso("msg-venta", "La cantidad debe ser al menos 1.", "error"); return; }
+    if (cantidad > p.stock) { aviso("msg-venta", "Solo quedan " + p.stock + " de " + p.nombre + ".", "error"); return; }
+    p.stock -= cantidad;
+    ventas.push({
+      fecha: hoy,
+      cliente: el("ven-cliente").value,
+      detalle: cantidad + " × " + p.nombre,
+      total: cantidad * p.precio
+    });
+    el("ven-cantidad").value = 1;
+    dibujarTodo();
+    aviso("msg-venta", "Venta anotada: " + dinero(cantidad * p.precio) + ".", "ok");
+  });
+
+  // ---------- Arranque ----------
+  dibujarTodo();
+  var inicial = location.hash.replace("#", "");
+  mostrar(["inicio", "productos", "clientes", "ventas"].indexOf(inicial) >= 0 ? inicial : "inicio");
+</script>
+</body>
+</html>
